@@ -1,27 +1,23 @@
+import menu from "../data/menu";
+
 function MenuPage() {
   return (
     <div style={{ padding: "20px" }}>
-      <h1>🍽️ Menù del Giorno</h1>
+      <h1>🍽️ Menù Villa dei Tigli</h1>
 
-      <div style={card}>
-        <h3>Lasagna alla Bolognese</h3>
-        <p>€14</p>
-      </div>
+      {menu.map((prodotto) => (
+        <div key={prodotto.id} style={card}>
+          <h3>{prodotto.nome}</h3>
 
-      <div style={card}>
-        <h3>Caprese con Bufala</h3>
-        <p>€12</p>
-      </div>
+          <p>
+            <strong>{prodotto.categoria}</strong>
+          </p>
 
-      <div style={card}>
-        <h3>Panino Crudo e Mozzarella</h3>
-        <p>€9</p>
-      </div>
+          <p>€ {prodotto.prezzo}</p>
 
-      <div style={card}>
-        <h3>Spritz</h3>
-        <p>€8</p>
-      </div>
+          <button>Aggiungi</button>
+        </div>
+      ))}
     </div>
   );
 }
@@ -31,8 +27,7 @@ const card = {
   padding: "15px",
   borderRadius: "10px",
   marginBottom: "15px",
-  boxShadow: "0 0 10px rgba(0,0,0,.1)"
+  boxShadow: "0 0 10px rgba(0,0,0,.1)",
 };
 
 export default MenuPage;
-
