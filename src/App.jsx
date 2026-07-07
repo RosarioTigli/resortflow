@@ -1,28 +1,14 @@
-import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import MenuPage from "./pages/MenuPage";
 
-function App() {
+export default function App() {
   return (
-    <div className="app">
-      <div className="card">
-
-        <h1>🏖️ Villa dei Tigli</h1>
-        <p className="subtitle">Resort & SPA</p>
-
-        <div className="ombrellone">
-          Ombrellone 18
-        </div>
-
-        <button>🍽️ Ordina Pranzo</button>
-
-        <button>🍹 Drink & Bar</button>
-
-        <button>🍨 Gelati e Dessert</button>
-
-        <button>🛎️ Chiama il Personale</button>
-
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/menu" element={<MenuPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;
