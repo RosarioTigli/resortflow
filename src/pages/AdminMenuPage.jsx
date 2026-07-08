@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
@@ -6,12 +6,16 @@ import {
   onSnapshot,
   updateDoc,
 } from "firebase/firestore";
+import * as XLSX from "xlsx";
 import { db } from "../services/firebase";
 
 export default function AdminMenuPage() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [previewRows, setPreviewRows] = useState([]);
+  const [previewMessage, setPreviewMessage] = useState("");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "menu"), (snapshot) => {
@@ -45,6 +49,55 @@ export default function AdminMenuPage() {
     });
   }
 
+  async function handleExcelImport(event) {
+    const selectedFile = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!selectedFile) {
+      return;
+    }
+
+    if (!selectedFile.name.toLowerCase().endsWith(".xlsx")) {
+      setPreviewRows([]);
+      setPreviewMessage("Please select a .xlsx file.");
+      return;
+    }
+
+    try {
+      const workbook = XLSX.read(await selectedFile.arrayBuffer(), { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+      const normalizedRows = rows
+        .map((row) => {
+          const categoria = row.Categoria ?? row.categoria ?? row.CATEGORIA ?? "";
+          const nome = row.Nome ?? row.nome ?? row.NOME ?? "";
+          const prezzo = row.Italiano ?? row.italiano ?? row.prezzo ?? row.Prezzo ?? "";
+
+          return {
+            categoria,
+            nome,
+            prezzo,
+          };
+        })
+        .filter((row) => row.categoria || row.nome || row.prezzo);
+
+      if (normalizedRows.length === 0) {
+        setPreviewRows([]);
+        setPreviewMessage("The selected file is empty.");
+        return;
+      }
+
+      setPreviewRows(normalizedRows);
+      setPreviewMessage("");
+    } catch (error) {
+      console.error("Error reading Excel file:", error);
+      setPreviewRows([]);
+      setPreviewMessage("Unable to read the selected Excel file.");
+    }
+  }
+
   return (
     <div style={styles.page}>
       <div style={styles.container}>
@@ -69,13 +122,50 @@ export default function AdminMenuPage() {
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search products"
           />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx"
+            style={{ display: "none" }}
+            onChange={handleExcelImport}
+          />
           <button
             style={styles.importButton}
-            onClick={() => alert("Excel import coming soon.")}
+            onClick={() => fileInputRef.current?.click()}
           >
-            📥 Import Excel
+            📥 Importa da Excel
           </button>
         </section>
+
+        {(previewMessage || previewRows.length > 0) && (
+          <section style={styles.previewCard}>
+            <h3 style={styles.previewTitle}>Preview</h3>
+            {previewMessage ? (
+              <p style={styles.previewMessage}>{previewMessage}</p>
+            ) : (
+              <div style={styles.tableWrapper}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.tableHeader}>Categoria</th>
+                      <th style={styles.tableHeader}>Nome</th>
+                      <th style={styles.tableHeader}>Prezzo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewRows.map((row, index) => (
+                      <tr key={`${row.nome}-${index}`}>
+                        <td style={styles.tableCell}>{row.categoria}</td>
+                        <td style={styles.tableCell}>{row.nome}</td>
+                        <td style={styles.tableCell}>€ {String(row.prezzo)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
 
         <section style={styles.productsSection}>
           {filteredProducts.length === 0 ? (
@@ -178,6 +268,40 @@ const styles = {
     borderRadius: "999px",
     cursor: "pointer",
     fontWeight: 700,
+  },
+  previewCard: {
+    background: "#ffffff",
+    borderRadius: "16px",
+    padding: "16px",
+    boxShadow: "0 10px 25px rgba(15, 23, 42, 0.08)",
+  },
+  previewTitle: {
+    margin: "0 0 10px",
+    color: "#1f2937",
+    fontSize: "1rem",
+  },
+  previewMessage: {
+    margin: 0,
+    color: "#64748b",
+  },
+  tableWrapper: {
+    overflowX: "auto",
+  },
+  table: {
+    width: "100%",
+    borderCollapse: "collapse",
+  },
+  tableHeader: {
+    textAlign: "left",
+    padding: "8px 10px",
+    borderBottom: "1px solid #e2e8f0",
+    color: "#334155",
+    fontWeight: 700,
+  },
+  tableCell: {
+    padding: "8px 10px",
+    borderBottom: "1px solid #f1f5f9",
+    color: "#475569",
   },
   productsSection: {
     display: "flex",
