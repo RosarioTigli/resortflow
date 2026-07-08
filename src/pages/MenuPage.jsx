@@ -83,23 +83,34 @@ export default function MenuPage() {
         </section>
 
         <section style={styles.productsSection}>
-          {menu.map((prodotto) => (
-            <article key={prodotto.id} style={styles.card}>
-              <div>
-                <h3 style={styles.productName}>{prodotto.nome}</h3>
-                <p style={styles.category}>{prodotto.categoria}</p>
-              </div>
-              <div style={styles.cardFooter}>
-                <span style={styles.price}>€ {prodotto.prezzo.toFixed(2)}</span>
-                <button
-                  style={styles.addButton}
-                  onClick={() => aggiungiAlCarrello(prodotto)}
-                >
-                  ➕ Add
-                </button>
-              </div>
-            </article>
-          ))}
+          {menu.map((prodotto) => {
+            const isAvailable = prodotto.available !== false;
+
+            return (
+              <article key={prodotto.id} style={styles.card}>
+                <div>
+                  <h3 style={styles.productName}>{prodotto.nome}</h3>
+                  <p style={styles.category}>{prodotto.categoria}</p>
+                  {!isAvailable && (
+                    <span style={styles.soldOutBadge}>Esaurito</span>
+                  )}
+                </div>
+                <div style={styles.cardFooter}>
+                  <span style={styles.price}>€ {prodotto.prezzo.toFixed(2)}</span>
+                  <button
+                    style={{
+                      ...styles.addButton,
+                      ...(isAvailable ? {} : styles.disabledButton),
+                    }}
+                    disabled={!isAvailable}
+                    onClick={() => isAvailable && aggiungiAlCarrello(prodotto)}
+                  >
+                    {isAvailable ? "➕ Add" : "Out of stock"}
+                  </button>
+                </div>
+              </article>
+            );
+          })}
         </section>
 
         <div style={styles.actions}>
@@ -240,6 +251,21 @@ const styles = {
     padding: "8px 12px",
     borderRadius: "999px",
     cursor: "pointer",
+    fontWeight: 700,
+  },
+  disabledButton: {
+    background: "#cbd5e1",
+    color: "#64748b",
+    cursor: "not-allowed",
+  },
+  soldOutBadge: {
+    display: "inline-block",
+    marginTop: "6px",
+    background: "#fee2e2",
+    color: "#dc2626",
+    padding: "4px 8px",
+    borderRadius: "999px",
+    fontSize: "0.78rem",
     fontWeight: 700,
   },
   actions: {
