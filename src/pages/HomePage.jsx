@@ -1,18 +1,30 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import "../App.css";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { umbrellaId } = useParams();
+  const [guestName, setGuestName] = useState("");
+
+  useEffect(() => {
+    setGuestName(localStorage.getItem("guestName") || "");
+    if (umbrellaId) {
+      localStorage.setItem("umbrellaId", umbrellaId);
+    }
+  }, [umbrellaId]);
 
   return (
     <div className="app">
       <div className="card">
         <h1>🏖️ Villa dei Tigli</h1>
 
-        <p className="subtitle">Resort & SPA</p>
+        <p className="subtitle">
+          {guestName ? `👋 Benvenuto, ${guestName}` : "👋 Benvenuto"}
+        </p>
 
         <div className="ombrellone">
-          Ombrellone 18
+          Ombrellone {umbrellaId}
         </div>
 
         <button onClick={() => navigate("/menu")}>

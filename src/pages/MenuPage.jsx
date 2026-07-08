@@ -18,9 +18,10 @@ export default function MenuPage() {
       return;
     }
 
+    const umbrellaId = Number(localStorage.getItem("umbrellaId") || 18);
     const prodotti = carrello.map((item) => `- ${item.nome}`).join("\n");
     const conferma = window.confirm(
-      `Villa dei Tigli Resort\n\nUmbrella: 18\n\nProducts:\n${prodotti}\n\nTotal: €${totale.toFixed(2)}\n\nConfirm order?`
+      `Villa dei Tigli Resort\n\nUmbrella: ${umbrellaId}\n\nProducts:\n${prodotti}\n\nTotal: €${totale.toFixed(2)}\n\nConfirm order?`
     );
 
     if (!conferma) {
@@ -29,10 +30,11 @@ export default function MenuPage() {
 
     try {
       await addDoc(collection(db, "orders"), {
-        umbrella: 18,
+        umbrella: Number(localStorage.getItem("umbrellaId")),
         items: carrello,
         total: totale,
         status: "new",
+        guestName: localStorage.getItem("guestName") || "",
         createdAt: serverTimestamp(),
       });
 
@@ -101,7 +103,10 @@ export default function MenuPage() {
         </section>
 
         <div style={styles.actions}>
-          <button style={styles.secondaryButton} onClick={() => navigate("/")}>
+          <button
+            style={styles.secondaryButton}
+            onClick={() => navigate(`/${localStorage.getItem("umbrellaId") || 18}`)}
+          >
             ⬅ Back to Home
           </button>
           <button style={styles.primaryButton} onClick={inviaOrdine}>
