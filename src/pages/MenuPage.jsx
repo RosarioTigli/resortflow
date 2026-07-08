@@ -1,12 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import menu from "../data/menu";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../services/firebase";
 
 export default function MenuPage() {
   const navigate = useNavigate();
   const [carrello, setCarrello] = useState([]);
+  const [menu, setMenu] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "menu"), (snapshot) => {
+      const prodotti = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMenu(prodotti);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   function aggiungiAlCarrello(prodotto) {
     setCarrello([...carrello, prodotto]);
@@ -83,34 +100,38 @@ export default function MenuPage() {
         </section>
 
         <section style={styles.productsSection}>
-          {menu.map((prodotto) => {
-            const isAvailable = prodotto.available !== false;
+          {menu.length === 0 ? (
+            <p style={styles.emptyText}>No products available.</p>
+          ) : (
+            menu.map((prodotto) => {
+              const isAvailable = prodotto.available !== false;
 
-            return (
-              <article key={prodotto.id} style={styles.card}>
-                <div>
-                  <h3 style={styles.productName}>{prodotto.nome}</h3>
-                  <p style={styles.category}>{prodotto.categoria}</p>
-                  {!isAvailable && (
-                    <span style={styles.soldOutBadge}>Esaurito</span>
-                  )}
-                </div>
-                <div style={styles.cardFooter}>
-                  <span style={styles.price}>€ {prodotto.prezzo.toFixed(2)}</span>
-                  <button
-                    style={{
-                      ...styles.addButton,
-                      ...(isAvailable ? {} : styles.disabledButton),
-                    }}
-                    disabled={!isAvailable}
-                    onClick={() => isAvailable && aggiungiAlCarrello(prodotto)}
-                  >
-                    {isAvailable ? "➕ Add" : "Out of stock"}
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+              return (
+                <article key={prodotto.id} style={styles.card}>
+                  <div>
+                    <h3 style={styles.productName}>{prodotto.nome}</h3>
+                    <p style={styles.category}>{prodotto.categoria}</p>
+                    {!isAvailable && (
+                      <span style={styles.soldOutBadge}>Esaurito</span>
+                    )}
+                  </div>
+                  <div style={styles.cardFooter}>
+                    <span style={styles.price}>€ {prodotto.prezzo.toFixed(2)}</span>
+                    <button
+                      style={{
+                        ...styles.addButton,
+                        ...(isAvailable ? {} : styles.disabledButton),
+                      }}
+                      disabled={!isAvailable}
+                      onClick={() => isAvailable && aggiungiAlCarrello(prodotto)}
+                    >
+                      {isAvailable ? "➕ Add" : "Out of stock"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })
+          )}
         </section>
 
         <div style={styles.actions}>

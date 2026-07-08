@@ -5,6 +5,7 @@ import KitchenPage from "./pages/KitchenPage";
 import ReceptionPage from "./pages/ReceptionPage";
 import SpaPage from "./pages/SpaPage";
 import WelcomePage from "./pages/WelcomePage";
+import AdminMenuPage from "./pages/AdminMenuPage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/reception" element={<ReceptionPage />} />
         <Route path="/spa" element={<SpaPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/admin/menu" element={<AdminMenuPage />} />
       </Routes>
     </BrowserRouter>
   );
