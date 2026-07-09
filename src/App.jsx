@@ -23,6 +23,7 @@ export default function App() {
         <Route path="/spa" element={<SpaPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/admin/menu" element={<AdminMenuPage />} />
+        <Route path="/admin/restaurant" element={<RestaurantAdminPage />} />
         <Route path="/restaurant" element={<RestaurantHomePage />} />
         <Route path="/restaurant/admin" element={<RestaurantAdminPage />} />
         <Route path="/restaurant/checkout" element={<RestaurantCheckoutPage />} />

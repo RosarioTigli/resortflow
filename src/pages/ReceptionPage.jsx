@@ -9,6 +9,7 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 import { db } from "../services/firebase";
 
 function groupItems(items = []) {
@@ -117,6 +118,7 @@ function playReceptionTone() {
 }
 
 export default function ReceptionPage() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("active");
@@ -239,6 +241,17 @@ export default function ReceptionPage() {
             <h1 style={styles.title}>🏨 Reception Orders</h1>
           </div>
           <div style={styles.badge}>{orders.length} orders</div>
+        </div>
+
+        <div style={styles.adminCards}>
+          <button style={styles.adminCard} onClick={() => navigate("/admin/menu")}>
+            <span style={styles.adminIcon}>🍽️</span>
+            <span style={styles.adminText}>Menu Admin</span>
+          </button>
+          <button style={styles.adminCard} onClick={() => navigate("/admin/restaurant")}>
+            <span style={styles.adminIcon}>🍴</span>
+            <span style={styles.adminText}>Restaurant Admin</span>
+          </button>
         </div>
 
         <div style={styles.toolbar}>
