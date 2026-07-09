@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { getStoredGuestName, getStoredUmbrellaId } from "../services/guestSession";
 
 export default function RestaurantSuccessPage() {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ export default function RestaurantSuccessPage() {
     }
 
     const cart = Array.isArray(locationState.cart) ? locationState.cart : [];
-    const guestName = locationState.guestName || localStorage.getItem("guestName") || "Guest";
-    const umbrellaId = locationState.umbrellaId || localStorage.getItem("umbrellaId") || "18";
+    const guestName = locationState.guestName || getStoredGuestName() || "Guest";
+    const umbrellaId = locationState.umbrellaId || getStoredUmbrellaId() || "";
     const total = Number(locationState.total || 0);
 
     if (cart.length > 0) {
@@ -49,7 +50,7 @@ export default function RestaurantSuccessPage() {
           <p style={styles.message}>
             Il tuo ordine è stato inviato con successo. La preparazione richiederà circa 15-20 minuti.
           </p>
-          <button style={styles.primaryButton} onClick={() => navigate(`/${localStorage.getItem("umbrellaId") || 18}`)}>
+          <button style={styles.primaryButton} onClick={() => navigate(`/${getStoredUmbrellaId() || "welcome"}`)}>
             Torna alla Home
           </button>
         </div>

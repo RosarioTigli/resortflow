@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { getStoredGuestName, setStoredUmbrellaId } from "../services/guestSession";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -7,9 +8,9 @@ export default function HomePage() {
   const [guestName, setGuestName] = useState("");
 
   useEffect(() => {
-    setGuestName(localStorage.getItem("guestName") || "");
+    setGuestName(getStoredGuestName());
     if (umbrellaId) {
-      localStorage.setItem("umbrellaId", umbrellaId);
+      setStoredUmbrellaId(umbrellaId);
     }
   }, [umbrellaId]);
 
@@ -56,7 +57,7 @@ export default function HomePage() {
           <p style={styles.welcome}>
             {guestName ? `👋 Welcome, ${guestName}` : "👋 Welcome"}
           </p>
-          <div style={styles.umbrellaBadge}>🏖️ Umbrella {umbrellaId || "18"}</div>
+          <div style={styles.umbrellaBadge}>🏖️ Umbrella {umbrellaId || ""}</div>
         </section>
 
         <div style={styles.grid}>

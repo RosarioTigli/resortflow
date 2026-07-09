@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { getStoredGuestName, getStoredUmbrellaId } from "../services/guestSession";
 
 export default function RestaurantCheckoutPage() {
   const navigate = useNavigate();
@@ -20,8 +21,8 @@ export default function RestaurantCheckoutPage() {
     }
   }, [locationState.cart]);
 
-  const guestName = locationState.guestName || localStorage.getItem("guestName") || "Guest";
-  const umbrellaId = locationState.umbrellaId || localStorage.getItem("umbrellaId") || "18";
+  const guestName = locationState.guestName || getStoredGuestName() || "Guest";
+  const umbrellaId = locationState.umbrellaId || getStoredUmbrellaId() || "";
   const total = cart.reduce((sum, item) => sum + Number(item.prezzo || 0) * Number(item.quantity || 1), 0);
 
   async function confirmOrder() {

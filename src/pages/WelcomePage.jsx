@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { buildHomePath, setGuestSession } from "../services/guestSession";
 
 const assetModules = import.meta.glob('../assets/**/*.{svg,png,jpg,jpeg,webp}', {
   eager: true,
@@ -166,6 +167,7 @@ function WelcomePage({
   initialGuestName = '',
   initialUmbrellaNumber = '',
 }) {
+  const navigate = useNavigate();
   const [phase, setPhase] = useState('splash');
   const [guestName, setGuestName] = useState(initialGuestName);
   const [umbrellaNumber, setUmbrellaNumber] = useState(initialUmbrellaNumber);
@@ -182,9 +184,15 @@ function WelcomePage({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    const session = setGuestSession({ guestName, umbrellaId: umbrellaNumber });
+
     if (typeof onContinue === 'function') {
-      onContinue({ guestName, umbrellaNumber });
+      onContinue(session);
     }
+
+    const targetPath = buildHomePath(session.umbrellaId);
+    navigate(targetPath, { replace: true });
   };
 
   return (

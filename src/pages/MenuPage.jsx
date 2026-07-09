@@ -7,6 +7,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { getStoredGuestName, getStoredUmbrellaId } from "../services/guestSession";
 
 export default function MenuPage() {
   const navigate = useNavigate();
@@ -64,7 +65,7 @@ export default function MenuPage() {
       return;
     }
 
-    const umbrellaId = Number(localStorage.getItem("umbrellaId") || 18);
+    const umbrellaId = getStoredUmbrellaId();
     const prodotti = carrello
       .map((item) => `- ${item.nome} x${item.quantità || 1}`)
       .join("\n");
@@ -78,11 +79,11 @@ export default function MenuPage() {
 
     try {
       await addDoc(collection(db, "orders"), {
-        umbrella: Number(localStorage.getItem("umbrellaId")),
+        umbrella: Number(umbrellaId || 0),
         items: carrello,
         total: totale,
         status: "new",
-        guestName: localStorage.getItem("guestName") || "",
+        guestName: getStoredGuestName(),
         createdAt: serverTimestamp(),
       });
 
@@ -183,7 +184,7 @@ export default function MenuPage() {
         <div style={styles.actions}>
           <button
             style={styles.secondaryButton}
-            onClick={() => navigate(`/${localStorage.getItem("umbrellaId") || 18}`)}
+            onClick={() => navigate(`/${getStoredUmbrellaId() || "welcome"}`)}
           >
             ⬅ Back to Home
           </button>

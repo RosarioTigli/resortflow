@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../services/firebase";
+import { getStoredGuestName, getStoredUmbrellaId } from "../services/guestSession";
 
 const categories = [
   { key: "pranzo", label: "🍝 Pranzo", icon: "🍝" },
@@ -138,8 +139,8 @@ export default function RestaurantHomePage() {
                 navigate("/restaurant/checkout", {
                   state: {
                     cart,
-                    guestName: localStorage.getItem("guestName") || "",
-                    umbrellaId: localStorage.getItem("umbrellaId") || "18",
+                    guestName: getStoredGuestName(),
+                    umbrellaId: getStoredUmbrellaId(),
                   },
                 })
               }

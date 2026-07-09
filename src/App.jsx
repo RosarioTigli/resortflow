@@ -10,12 +10,20 @@ import RestaurantHomePage from "./pages/RestaurantHomePage";
 import RestaurantAdminPage from "./pages/RestaurantAdminPage";
 import RestaurantCheckoutPage from "./pages/RestaurantCheckoutPage";
 import RestaurantSuccessPage from "./pages/RestaurantSuccessPage";
+import { getStoredUmbrellaId } from "./services/guestSession";
+
+function RootRedirect() {
+  const umbrellaId = getStoredUmbrellaId();
+
+  return <Navigate to={umbrellaId ? `/u/${umbrellaId}` : "/welcome"} replace />;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/18" replace />} />
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/u/:umbrellaId" element={<HomePage />} />
         <Route path="/:umbrellaId" element={<HomePage />} />
         <Route path="/menu" element={<Navigate to="/restaurant" replace />} />
         <Route path="/kitchen" element={<KitchenPage />} />

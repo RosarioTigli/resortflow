@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { getStoredUmbrellaId } from "../services/guestSession";
 
 const services = [
   {
@@ -37,7 +38,7 @@ export default function SpaPage() {
   return (
     <div style={styles.page}>
       <div style={styles.shell}>
-        <button style={styles.backButton} onClick={() => navigate("/18")}>
+        <button style={styles.backButton} onClick={() => navigate(`/${getStoredUmbrellaId() || "welcome"}`)}>
           ← Back to Home
         </button>
 
