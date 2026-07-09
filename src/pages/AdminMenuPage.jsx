@@ -2,9 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   collection,
+  deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   updateDoc,
+  writeBatch,
 } from "firebase/firestore";
 import * as XLSX from "xlsx";
 import { db } from "../services/firebase";
@@ -16,6 +19,7 @@ export default function AdminMenuPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [previewRows, setPreviewRows] = useState([]);
   const [previewMessage, setPreviewMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "menu"), (snapshot) => {
@@ -91,10 +95,47 @@ export default function AdminMenuPage() {
 
       setPreviewRows(normalizedRows);
       setPreviewMessage("");
+      setStatusMessage("");
     } catch (error) {
       console.error("Error reading Excel file:", error);
       setPreviewRows([]);
       setPreviewMessage("Unable to read the selected Excel file.");
+    }
+  }
+
+  async function publishMenu() {
+    if (previewRows.length === 0) {
+      return;
+    }
+
+    const confirmed = window.confirm("Pubblicare il menu aggiornato?");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const menuRef = collection(db, "menu");
+      const existingItems = await getDocs(menuRef);
+
+      await Promise.all(existingItems.docs.map((item) => deleteDoc(item.ref)));
+
+      const batch = writeBatch(db);
+      previewRows.forEach((row, index) => {
+        const newDocRef = doc(menuRef);
+        batch.set(newDocRef, {
+          categoria: row.categoria,
+          nome: row.nome,
+          prezzo: Number(row.prezzo) || 0,
+          ordine: index + 1,
+          available: true,
+        });
+      });
+
+      await batch.commit();
+      setStatusMessage("Menu aggiornato con successo");
+    } catch (error) {
+      console.error("Error publishing menu:", error);
+      setStatusMessage("Erro durante l'aggiornamento del menu.");
     }
   }
 
@@ -135,7 +176,18 @@ export default function AdminMenuPage() {
           >
             📥 Importa da Excel
           </button>
+          <button
+            style={styles.publishButton}
+            onClick={publishMenu}
+            disabled={previewRows.length === 0}
+          >
+            Pubblica Menu
+          </button>
         </section>
+
+        {statusMessage ? (
+          <div style={styles.statusMessage}>{statusMessage}</div>
+        ) : null}
 
         {(previewMessage || previewRows.length > 0) && (
           <section style={styles.previewCard}>
@@ -267,6 +319,22 @@ const styles = {
     padding: "10px 14px",
     borderRadius: "999px",
     cursor: "pointer",
+    fontWeight: 700,
+  },
+  publishButton: {
+    border: "none",
+    background: "#2e7d32",
+    color: "#ffffff",
+    padding: "10px 14px",
+    borderRadius: "999px",
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+  statusMessage: {
+    background: "#e8f5e9",
+    color: "#2e7d32",
+    padding: "10px 12px",
+    borderRadius: "12px",
     fontWeight: 700,
   },
   previewCard: {

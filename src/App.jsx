@@ -6,6 +6,8 @@ import ReceptionPage from "./pages/ReceptionPage";
 import SpaPage from "./pages/SpaPage";
 import WelcomePage from "./pages/WelcomePage";
 import AdminMenuPage from "./pages/AdminMenuPage";
+import RestaurantHomePage from "./pages/RestaurantHomePage";
+import RestaurantAdminPage from "./pages/RestaurantAdminPage";
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
         <Route path="/spa" element={<SpaPage />} />
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/admin/menu" element={<AdminMenuPage />} />
+        <Route path="/restaurant" element={<RestaurantHomePage />} />
+        <Route path="/restaurant/admin" element={<RestaurantAdminPage />} />
       </Routes>
     </BrowserRouter>
   );
