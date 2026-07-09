@@ -1,286 +1,290 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function WelcomePage() {
-  const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const umbrellaId = localStorage.getItem("umbrellaId") || "18";
+const assetModules = import.meta.glob('../assets/**/*.{svg,png,jpg,jpeg,webp}', {
+  eager: true,
+  import: 'default',
+});
+
+const logoSrc = Object.entries(assetModules).find(([assetPath]) =>
+  /villa|tigli|logo/i.test(assetPath)
+)?.[1];
+
+const splashImage =
+  'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80';
+
+const sandImage =
+  'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1800&q=80';
+
+const pageStyle = {
+  minHeight: '100vh',
+  width: '100%',
+  position: 'relative',
+  overflow: 'hidden',
+  background: '#f7efe4',
+  fontFamily: '"Segoe UI", "Helvetica Neue", Arial, sans-serif',
+};
+
+const overlayStyle = {
+  position: 'absolute',
+  inset: 0,
+  background:
+    'linear-gradient(135deg, rgba(47, 38, 21, 0.45), rgba(138, 112, 72, 0.2))',
+};
+
+const splashStyle = {
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundImage: `linear-gradient(135deg, rgba(66, 51, 26, 0.6), rgba(72, 56, 32, 0.3)), url(${splashImage})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  color: '#fdf8f2',
+  textAlign: 'center',
+  transition: 'opacity 0.8s ease',
+};
+
+const cardStyle = {
+  position: 'absolute',
+  inset: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundImage: `linear-gradient(135deg, rgba(255, 247, 233, 0.85), rgba(236, 221, 196, 0.9)), url(${sandImage})`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  padding: '24px',
+  transition: 'opacity 0.8s ease',
+};
+
+const cardInnerStyle = {
+  width: '100%',
+  maxWidth: '500px',
+  background: 'rgba(255, 255, 255, 0.95)',
+  borderRadius: '28px',
+  padding: '42px 36px',
+  boxShadow: '0 24px 60px rgba(55, 41, 21, 0.18)',
+  border: '1px solid rgba(182, 151, 92, 0.24)',
+  backdropFilter: 'blur(14px)',
+};
+
+const logoStyle = {
+  width: 'clamp(180px, 28vw, 270px)',
+  height: 'auto',
+  display: 'block',
+  margin: '0 auto 18px',
+  filter: 'drop-shadow(0 10px 24px rgba(0, 0, 0, 0.16))',
+};
+
+const splashTitleStyle = {
+  margin: '0 0 10px',
+  fontSize: 'clamp(2rem, 4vw, 3rem)',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+};
+
+const splashLineStyle = {
+  margin: '0',
+  fontSize: 'clamp(1rem, 2.2vw, 1.35rem)',
+  letterSpacing: '0.16em',
+  textTransform: 'uppercase',
+  opacity: 0.9,
+};
+
+const splashWelcomeStyle = {
+  margin: '20px 0 10px',
+  fontSize: 'clamp(2.2rem, 4.2vw, 3.3rem)',
+  fontWeight: 600,
+  lineHeight: 1.2,
+};
+
+const splashCaptionStyle = {
+  margin: '0',
+  fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+  lineHeight: 1.7,
+  color: 'rgba(255, 248, 242, 0.88)',
+  maxWidth: '360px',
+  marginLeft: 'auto',
+  marginRight: 'auto',
+};
+
+const titleStyle = {
+  margin: '0 0 10px',
+  fontSize: 'clamp(2.1rem, 3.8vw, 2.8rem)',
+  color: '#2f2a1f',
+  fontWeight: 700,
+  letterSpacing: '0.02em',
+};
+
+const subtitleStyle = {
+  margin: '0 0 28px',
+  color: '#6f604b',
+  fontSize: '1.05rem',
+  lineHeight: 1.7,
+};
+
+const labelStyle = {
+  display: 'block',
+  marginBottom: '6px',
+  color: '#5c4d3a',
+  fontSize: '0.95rem',
+  fontWeight: 600,
+};
+
+const inputStyle = {
+  width: '100%',
+  border: '1px solid rgba(132, 111, 77, 0.24)',
+  borderRadius: '14px',
+  padding: '14px 16px',
+  fontSize: '1rem',
+  outline: 'none',
+  marginBottom: '18px',
+  background: '#fcfaf6',
+  color: '#2f2a1f',
+  boxSizing: 'border-box',
+};
+
+const buttonStyle = {
+  width: '100%',
+  border: 'none',
+  borderRadius: '999px',
+  padding: '15px 20px',
+  fontSize: '1rem',
+  fontWeight: 700,
+  color: '#ffffff',
+  background: 'linear-gradient(135deg, #6e8f67, #5b7754)',
+  cursor: 'pointer',
+  marginTop: '8px',
+  boxShadow: '0 12px 24px rgba(91, 119, 84, 0.24)',
+};
+
+function WelcomePage({
+  onContinue,
+  initialGuestName = '',
+  initialUmbrellaNumber = '',
+}) {
+  const [phase, setPhase] = useState('splash');
+  const [guestName, setGuestName] = useState(initialGuestName);
+  const [umbrellaNumber, setUmbrellaNumber] = useState(initialUmbrellaNumber);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setShowForm(true);
-    }, 1800);
-
+    const timer = window.setTimeout(() => setPhase('card'), 2200);
     return () => window.clearTimeout(timer);
   }, []);
 
-  function handleEnter() {
-    const trimmedName = name.trim();
+  useEffect(() => {
+    setGuestName(initialGuestName);
+    setUmbrellaNumber(initialUmbrellaNumber);
+  }, [initialGuestName, initialUmbrellaNumber]);
 
-    if (!trimmedName) {
-      alert("Please enter your name.");
-      return;
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (typeof onContinue === 'function') {
+      onContinue({ guestName, umbrellaNumber });
     }
-
-    localStorage.setItem("guestName", trimmedName);
-    navigate(`/${umbrellaId}`);
-  }
+  };
 
   return (
-    <div style={styles.page}>
-      <div style={{ ...styles.card, ...(showForm ? styles.cardVisible : styles.cardHidden) }}>
-        <div style={styles.brandBar}>
-          <div style={styles.logoMark}>V</div>
-          <div style={styles.brandText}>
-            <p style={styles.logoLabel}>Villa dei Tigli</p>
-            <p style={styles.logoSub}>Resort & Spa</p>
-          </div>
+    <div style={pageStyle}>
+      <div style={{ ...splashStyle, opacity: phase === 'splash' ? 1 : 0 }}>
+        <div style={{ position: 'relative', zIndex: 1, padding: '24px' }}>
+          {logoSrc ? (
+            <img src={logoSrc} alt="Villa dei Tigli" style={logoStyle} />
+          ) : (
+            <div
+              style={{
+                ...logoStyle,
+                fontSize: 'clamp(2rem, 3.5vw, 2.8rem)',
+                fontWeight: 700,
+                textAlign: 'center',
+                color: '#fffdf8',
+                letterSpacing: '0.08em',
+              }}
+            >
+              Villa dei Tigli
+            </div>
+          )}
+          <p style={splashTitleStyle}>Villa dei Tigli</p>
+          <p style={splashLineStyle}>Resort & Spa</p>
+
+          <h1 style={splashWelcomeStyle}>
+            Benvenuto
+            <br />
+            in Villa dei Tigli
+          </h1>
+
+          <p style={splashCaptionStyle}>
+            Ogni momento è pensato
+            <br />
+            per il tuo relax.
+          </p>
         </div>
+        <div style={overlayStyle} />
+      </div>
 
-        {!showForm ? (
-          <div style={styles.introScreen}>
-            <p style={styles.introHeadline}>Un benvenuto riservato.</p>
-            <p style={styles.tagline}>
-              Lascia che la luce calda della costa e il comfort della nostra villa siano il primo ricordo della tua giornata.
-            </p>
+      <div style={{ ...cardStyle, opacity: phase === 'card' ? 1 : 0 }}>
+        <div style={cardInnerStyle}>
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            {logoSrc ? (
+              <img src={logoSrc} alt="Villa dei Tigli" style={{ ...logoStyle, width: '180px', marginBottom: '12px' }} />
+            ) : (
+              <div
+                style={{
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  color: '#2f2a1f',
+                  marginBottom: '12px',
+                }}
+              >
+                Villa dei Tigli
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            <div style={styles.hero}>
-              <p style={styles.eyebrow}>Benvenuto</p>
-              <h1 style={styles.title}>Comincia la tua esperienza esclusiva.</h1>
-              <p style={styles.heroCopy}>
-                Confermiamo il tuo accesso a Villa dei Tigli con un momento di calma, cura e dettagli su misura.
-              </p>
-            </div>
 
-            <div style={styles.detailGrid}>
-              <div style={styles.infoBox}>
-                <span style={styles.infoLabel}>Umbrella</span>
-                <strong style={styles.infoValue}>{umbrellaId}</strong>
-              </div>
-              <div style={styles.infoBoxAlt}>
-                <span style={styles.infoLabel}>Stile</span>
-                <strong style={styles.infoValue}>Elegante</strong>
-              </div>
-            </div>
+          <h2 style={titleStyle}>Benvenuto</h2>
+          <p style={subtitleStyle}>
+            Siamo felici di accompagnarti
+            <br />
+            nella tua esperienza.
+          </p>
 
-            <label style={styles.label} htmlFor="guestName">
-              Nome ospite
+          <form onSubmit={handleSubmit}>
+            <label style={labelStyle} htmlFor="umbrellaNumber">
+              Umbrella number
+            </label>
+            <input
+              id="umbrellaNumber"
+              type="number"
+              min="1"
+              value={umbrellaNumber}
+              onChange={(event) => setUmbrellaNumber(event.target.value)}
+              placeholder="Numero ombrellone"
+              style={inputStyle}
+            />
+
+            <label style={labelStyle} htmlFor="guestName">
+              Guest Name
             </label>
             <input
               id="guestName"
-              style={styles.input}
               type="text"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Inserisci il tuo nome"
+              value={guestName}
+              onChange={(event) => setGuestName(event.target.value)}
+              placeholder="Il tuo nome"
+              style={inputStyle}
             />
 
-            <button style={styles.button} onClick={handleEnter}>
-              Accedi alla tua esperienza
+            <button type="submit" style={buttonStyle}>
+              Entra nella tua esperienza
             </button>
-          </>
-        )}
+          </form>
+        </div>
       </div>
     </div>
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "24px 20px",
-    backgroundColor: "#F4E8DE",
-    backgroundImage:
-      "radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 28%), radial-gradient(circle at bottom right, rgba(191, 162, 108, 0.18), transparent 32%)",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "520px",
-    background: "rgba(255, 255, 255, 0.96)",
-    borderRadius: "32px",
-    padding: "32px",
-    boxShadow: "0 30px 80px rgba(47, 43, 40, 0.12)",
-    border: "1px solid rgba(199, 161, 90, 0.16)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-    transform: "translateY(0)",
-    opacity: 1,
-    transition: "opacity 0.55s ease, transform 0.55s ease",
-  },
-  cardHidden: {
-    opacity: 0,
-    transform: "translateY(26px)",
-  },
-  cardVisible: {
-    opacity: 1,
-    transform: "translateY(0)",
-  },
-  brandBar: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-    paddingBottom: "4px",
-    borderBottom: "1px solid rgba(199, 161, 90, 0.16)",
-  },
-  logoMark: {
-    width: "62px",
-    height: "62px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, #D6B87F 0%, #BFA26C 100%)",
-    color: "#2F2B28",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "1.3rem",
-    fontWeight: 800,
-    boxShadow: "0 16px 28px rgba(191, 162, 108, 0.18)",
-  },
-  brandText: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "2px",
-  },
-  logoLabel: {
-    margin: 0,
-    fontSize: "1rem",
-    letterSpacing: "0.14em",
-    textTransform: "uppercase",
-    fontWeight: 800,
-    color: "#2F2B28",
-  },
-  logoSub: {
-    margin: 0,
-    fontSize: "0.75rem",
-    letterSpacing: "0.16em",
-    textTransform: "uppercase",
-    color: "#6c6a62",
-  },
-  introScreen: {
-    minHeight: "320px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: "18px",
-    textAlign: "center",
-    paddingTop: "12px",
-  },
-  introHeadline: {
-    margin: 0,
-    fontSize: "2rem",
-    lineHeight: 1.1,
-    fontWeight: 800,
-    color: "#2F2B28",
-    maxWidth: "340px",
-  },
-  tagline: {
-    margin: 0,
-    color: "#6b655d",
-    fontSize: "1rem",
-    lineHeight: 1.8,
-    maxWidth: "360px",
-  },
-  hero: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  eyebrow: {
-    margin: 0,
-    fontSize: "0.8rem",
-    letterSpacing: "0.2em",
-    textTransform: "uppercase",
-    color: "#7d8c73",
-    fontWeight: 700,
-  },
-  title: {
-    margin: 0,
-    fontSize: "1.95rem",
-    lineHeight: 1.15,
-    fontWeight: 800,
-    color: "#2F2B28",
-  },
-  heroCopy: {
-    margin: 0,
-    color: "#6b655d",
-    fontSize: "1rem",
-    lineHeight: 1.75,
-    maxWidth: "460px",
-  },
-  detailGrid: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "14px",
-  },
-  infoBox: {
-    flex: "1 1 160px",
-    minWidth: "160px",
-    background: "#F8F4ED",
-    border: "1px solid rgba(199, 161, 90, 0.24)",
-    borderRadius: "20px",
-    padding: "16px 18px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-  },
-  infoBoxAlt: {
-    flex: "1 1 160px",
-    minWidth: "160px",
-    background: "rgba(191, 162, 108, 0.06)",
-    border: "1px solid rgba(191, 162, 108, 0.16)",
-    borderRadius: "20px",
-    padding: "16px 18px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-  },
-  infoLabel: {
-    margin: 0,
-    color: "#6b655d",
-    fontSize: "0.95rem",
-    fontWeight: 700,
-  },
-  infoValue: {
-    margin: 0,
-    color: "#2F2B28",
-    fontSize: "1.2rem",
-    fontWeight: 800,
-  },
-  label: {
-    fontWeight: 700,
-    color: "#4b463f",
-    fontSize: "0.95rem",
-  },
-  input: {
-    width: "100%",
-    border: "1px solid #e4d8c8",
-    borderRadius: "16px",
-    padding: "14px 16px",
-    fontSize: "1rem",
-    outline: "none",
-    background: "#fff",
-    boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.05)",
-    transition: "border-color 0.2s ease, box-shadow 0.2s ease",
-  },
-  button: {
-    border: "none",
-    background: "linear-gradient(135deg, #9E8C64 0%, #BFA26C 100%)",
-    color: "#2F2B28",
-    padding: "16px 18px",
-    borderRadius: "999px",
-    cursor: "pointer",
-    fontWeight: 800,
-    fontSize: "1rem",
-    letterSpacing: "0.02em",
-    boxShadow: "0 18px 32px rgba(191, 162, 108, 0.22)",
-    transition: "transform 0.2s ease, box-shadow 0.2s ease",
-  },
-};
+export default WelcomePage;
