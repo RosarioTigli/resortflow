@@ -26,7 +26,36 @@ export default function MenuPage() {
   }, []);
 
   function aggiungiAlCarrello(prodotto) {
-    setCarrello([...carrello, prodotto]);
+    setCarrello((carrelloCorrente) => {
+      const esistente = carrelloCorrente.find((item) => item.id === prodotto.id);
+
+      if (esistente) {
+        return carrelloCorrente.map((item) =>
+          item.id === prodotto.id
+            ? { ...item, quantità: Number(item.quantità || 1) + 1 }
+            : item
+        );
+      }
+
+      return [...carrelloCorrente, { ...prodotto, quantità: 1 }];
+    });
+  }
+
+  function aggiornaQuantità(prodottoId, delta) {
+    setCarrello((carrelloCorrente) => {
+      const aggiornato = carrelloCorrente
+        .map((item) => {
+          if (item.id !== prodottoId) {
+            return item;
+          }
+
+          const nuovaQuantità = Number(item.quantità || 1) + delta;
+          return nuovaQuantità > 0 ? { ...item, quantità: nuovaQuantità } : null;
+        })
+        .filter(Boolean);
+
+      return aggiornato;
+    });
   }
 
   async function inviaOrdine() {
@@ -36,7 +65,9 @@ export default function MenuPage() {
     }
 
     const umbrellaId = Number(localStorage.getItem("umbrellaId") || 18);
-    const prodotti = carrello.map((item) => `- ${item.nome}`).join("\n");
+    const prodotti = carrello
+      .map((item) => `- ${item.nome} x${item.quantità || 1}`)
+      .join("\n");
     const conferma = window.confirm(
       `Villa dei Tigli Resort\n\nUmbrella: ${umbrellaId}\n\nProducts:\n${prodotti}\n\nTotal: €${totale.toFixed(2)}\n\nConfirm order?`
     );
@@ -64,7 +95,7 @@ export default function MenuPage() {
   }
 
   const totale = carrello.reduce(
-    (somma, prodotto) => somma + prodotto.prezzo,
+    (somma, prodotto) => somma + prodotto.prezzo * (prodotto.quantità || 1),
     0
   );
 
@@ -89,10 +120,25 @@ export default function MenuPage() {
             <p style={styles.emptyText}>Your cart is empty.</p>
           ) : (
             <ul style={styles.cartList}>
-              {carrello.map((item, index) => (
-                <li key={`${item.id}-${index}`} style={styles.cartItem}>
-                  <span>{item.nome}</span>
-                  <span>€ {item.prezzo.toFixed(2)}</span>
+              {carrello.map((item) => (
+                <li key={item.id} style={styles.cartItem}>
+                  <div style={styles.cartItemInfo}>
+                    <span style={styles.itemName}>{item.nome}</span>
+                    <span style={styles.itemMeta}>
+                      € {Number(item.prezzo).toFixed(2)} x {item.quantità || 1} = € {(
+                        Number(item.prezzo) * (item.quantità || 1)
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                  <div style={styles.cartControls}>
+                    <button style={styles.quantityButton} onClick={() => aggiornaQuantità(item.id, -1)}>
+                      −
+                    </button>
+                    <span style={styles.quantityValue}>{item.quantità || 1}</span>
+                    <button style={styles.quantityButton} onClick={() => aggiornaQuantità(item.id, 1)}>
+                      +
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -229,6 +275,41 @@ const styles = {
     padding: "8px 0",
     borderBottom: "1px solid #eef2f7",
     color: "#334155",
+    gap: "10px",
+  },
+  cartItemInfo: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+  },
+  itemName: {
+    fontWeight: 700,
+    color: "#111827",
+  },
+  itemMeta: {
+    fontSize: "0.9rem",
+    color: "#64748b",
+  },
+  cartControls: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  quantityButton: {
+    width: "28px",
+    height: "28px",
+    borderRadius: "999px",
+    border: "1px solid #cbd5e1",
+    background: "#ffffff",
+    cursor: "pointer",
+    fontWeight: 700,
+    color: "#2e7d32",
+  },
+  quantityValue: {
+    minWidth: "20px",
+    textAlign: "center",
+    fontWeight: 700,
+    color: "#111827",
   },
   productsSection: {
     display: "flex",

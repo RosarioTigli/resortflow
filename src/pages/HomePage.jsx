@@ -18,7 +18,7 @@ export default function HomePage() {
       icon: "🍽️",
       title: "Restaurant",
       subtitle: "Enjoy a curated lunch experience",
-      action: () => navigate("/menu"),
+      action: () => navigate("/restaurant"),
       accent: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
       textColor: "#92400e",
       isPrimary: true,

@@ -8,6 +8,8 @@ import WelcomePage from "./pages/WelcomePage";
 import AdminMenuPage from "./pages/AdminMenuPage";
 import RestaurantHomePage from "./pages/RestaurantHomePage";
 import RestaurantAdminPage from "./pages/RestaurantAdminPage";
+import RestaurantCheckoutPage from "./pages/RestaurantCheckoutPage";
+import RestaurantSuccessPage from "./pages/RestaurantSuccessPage";
 
 export default function App() {
   return (
@@ -15,7 +17,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/18" replace />} />
         <Route path="/:umbrellaId" element={<HomePage />} />
-        <Route path="/menu" element={<MenuPage />} />
+        <Route path="/menu" element={<Navigate to="/restaurant" replace />} />
         <Route path="/kitchen" element={<KitchenPage />} />
         <Route path="/reception" element={<ReceptionPage />} />
         <Route path="/spa" element={<SpaPage />} />
@@ -23,6 +25,8 @@ export default function App() {
         <Route path="/admin/menu" element={<AdminMenuPage />} />
         <Route path="/restaurant" element={<RestaurantHomePage />} />
         <Route path="/restaurant/admin" element={<RestaurantAdminPage />} />
+        <Route path="/restaurant/checkout" element={<RestaurantCheckoutPage />} />
+        <Route path="/restaurant/success" element={<RestaurantSuccessPage />} />
       </Routes>
     </BrowserRouter>
   );
