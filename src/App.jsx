@@ -23,7 +23,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
-        <Route path="/u/:umbrellaId" element={<HomePage />} />
+        <Route path="/u/:umbrellaId" element={<WelcomePage />} />
         <Route path="/:umbrellaId" element={<HomePage />} />
         <Route path="/menu" element={<Navigate to="/restaurant" replace />} />
         <Route path="/kitchen" element={<KitchenPage />} />

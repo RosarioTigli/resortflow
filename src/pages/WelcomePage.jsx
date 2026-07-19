@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { buildHomePath, setGuestSession } from "../services/guestSession";
 
 const assetModules = import.meta.glob('../assets/**/*.{svg,png,jpg,jpeg,webp}', {
@@ -168,19 +168,22 @@ function WelcomePage({
   initialUmbrellaNumber = '',
 }) {
   const navigate = useNavigate();
-  const [phase, setPhase] = useState('splash');
+  const { umbrellaId } = useParams();
+  const [phase] = useState('card');
   const [guestName, setGuestName] = useState(initialGuestName);
-  const [umbrellaNumber, setUmbrellaNumber] = useState(initialUmbrellaNumber);
+  const [umbrellaNumber, setUmbrellaNumber] = useState(
+  umbrellaId || initialUmbrellaNumber
+);
+
+  //useEffect(() => {
+   // const timer = window.setTimeout(() => setPhase('card'), 2200);
+    //r//eturn () => window.clearTimeout(timer);
+  //}, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setPhase('card'), 2200);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    setGuestName(initialGuestName);
-    setUmbrellaNumber(initialUmbrellaNumber);
-  }, [initialGuestName, initialUmbrellaNumber]);
+  setGuestName(initialGuestName);
+  setUmbrellaNumber(umbrellaId || initialUmbrellaNumber);
+}, [initialGuestName, initialUmbrellaNumber, umbrellaId]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
